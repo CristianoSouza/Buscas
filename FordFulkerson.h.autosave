@@ -1,0 +1,43 @@
+#ifndef FORDFULKERSON_H
+#define FORDFULKERSON_H
+
+#define INFINITO 1000000
+#include <QThread>
+#include <QDebug>
+#include <QString>
+#include <QColor>
+#include <QMainWindow>
+
+#include "graph.h"
+
+
+#define INF  100000
+
+class FordFulkerson : public QThread {
+    Q_OBJECT
+
+public:
+    FordFulkerson ( Graph *g, int index, QObject *parent=0 );
+
+    Graph *getGraph();
+
+    ~FordFulkerson () ;
+
+protected:
+    void run();
+
+signals:
+    void update ( Graph * );
+
+private:
+    Graph *g;
+    int tempo;
+    int index,final;
+    void fordFulkerson ();
+
+    void visit (Vertex *);
+
+    //void createNewGraph ( int );
+};
+
+#endif // FORDFULKERSON_H
