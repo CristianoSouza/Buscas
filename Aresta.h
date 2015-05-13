@@ -9,16 +9,16 @@ class Aresta : public QObject {
     Q_OBJECT
 
 public:
-    Aresta ( int , int, int, QColor, QObject *pai=0 );
+    Aresta ( QString , QString, int, QColor, QObject *pai=0 );
     ~Aresta();
 
     static Aresta* clonar ( Aresta * );
-    static void  acrescentar ( Aresta **, int, int, int, QColor cor );
+    static void  acrescentar ( Aresta **, QString, QString, int, QColor cor );
     static Aresta* removeMenor ( Aresta **, Aresta *m=0 );
 
     int    getPeso ();
-    int    getIndice();
-    int    getIndiceAdj();
+    QString getverticeOrigem();
+    QString getverticeDestino();
     QColor getCor();
     Aresta   *getProximo();
 
@@ -27,8 +27,8 @@ public:
     void pintar( QPoint ponto1, QPoint ponto2, QPainter & );
 
 private:    
-    int    indice;
-    int    indiceAdj;
+    QString verticeOrigem;
+    QString verticeDestino;
     int    peso;
     QColor cor;
     Aresta   *proximo;

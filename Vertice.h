@@ -16,7 +16,7 @@ public:
      ~Vertice();
 
     QString getSET ();
-    int     getIndiceVertice  ();
+    int getIndiceVertice();
     QString getNome ();
     QColor  getCor();
     Aresta   *getArestas ();
@@ -28,7 +28,7 @@ public:
     //int     getY ();
 
     void setSET ( QString );
-    void acrescentar ( int, int, QColor color );
+    void acrescentar ( QString, int, QColor color );
     void setPai ( Vertice * );
     void setPeso ( int );
     void setTempoEntrada ( int  );

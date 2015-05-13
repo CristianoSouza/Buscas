@@ -27,14 +27,15 @@ public:
     bool adicionarAresta ( QString, QString, int, QColor cor=Qt::black );
 
     Aresta    *getArestas();
-    Vertice  **getVertice () ;
-    Vertice  *getVerticeAt ( int );
+    QHash<QString,Vertice*>  getVertice ();
+    Vertice  *getVertice ( QString );
     int     getQuantidadeVertice();
     int     getVerticeIndice ( QString  );
     QString getCaminho ( QString );
     QString carregarDoArquivo( QString );
     QString BuscaVerticeRaiz( QString );
     QString BuscaArrestasDeDeterminadoVertice( QString,  Vertice* );
+    QString BuscaVerticesAdj( QString , QString );
     void pintar ();
 
     void resize ( int );
@@ -46,7 +47,9 @@ signals:
 
 private:
     QMainWindow *main;
-    Vertice      **vertice;
+    //Vertice      **vertice;
+    QHash<QString, Vertice*> vertice;
+    //std::map<std::string, Vertice> vertice;
     Aresta        *arestas;
 
     int max;

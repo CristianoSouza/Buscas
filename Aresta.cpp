@@ -1,8 +1,8 @@
 #include "Aresta.h"
 
-Aresta::Aresta ( int indice, int indiceAdj, int peso, QColor cor, QObject *pai ) : QObject(pai) {
-    this->indice    = indice;    // source of edges
-    this->indiceAdj = indiceAdj; // adjacent of edges
+Aresta::Aresta ( QString verticeOrigem, QString verticeDestino, int peso, QColor cor, QObject *pai ) : QObject(pai) {
+    this->verticeOrigem    = verticeOrigem;    // source of edges
+    this->verticeDestino = verticeDestino; // adjacent of edges
     this->peso     = peso;
 
     this->proximo = NULL;
@@ -27,12 +27,12 @@ int Aresta::getPeso()  {
     return this->peso;
 }
 
-int Aresta::getIndice() {
-    return this->indice;
+QString Aresta::getverticeOrigem() {
+    return this->verticeOrigem;
 }
 
-int Aresta::getIndiceAdj() {
-    return this->indiceAdj;
+QString Aresta::getverticeDestino() {
+    return this->verticeDestino;
 }
 
 QColor Aresta::getCor () {
@@ -43,11 +43,11 @@ Aresta *Aresta::getProximo() {
     return this->proximo;
 }
 
-void Aresta::acrescentar( Aresta **aresta, int indice, int indiceAdj, int peso, QColor cor ) {
+void Aresta::acrescentar( Aresta **aresta, QString verticeOrigem, QString verticeDestino, int peso, QColor cor ) {
     if (*aresta==NULL)
-        *aresta = new Aresta ( indice, indiceAdj, peso, cor );
+        *aresta = new Aresta ( verticeOrigem, verticeDestino, peso, cor );
     else
-        acrescentar( &(*aresta)->proximo, indice, indiceAdj, peso, cor );
+        acrescentar( &(*aresta)->proximo, verticeOrigem, verticeDestino, peso, cor );
 }
 
 Aresta* Aresta::removeMenor( Aresta **arestas, Aresta *aresta ) {
@@ -69,7 +69,7 @@ Aresta* Aresta::removeMenor( Aresta **arestas, Aresta *aresta ) {
 
 Aresta* Aresta::clonar ( Aresta *aresta ) {
     if (aresta) {
-        Aresta *arestaClone = new Aresta(aresta->getIndice(), aresta->getIndiceAdj(),aresta->getPeso(), aresta->getCor() );
+        Aresta *arestaClone = new Aresta(aresta->getverticeOrigem(), aresta->getverticeDestino(),aresta->getPeso(), aresta->getCor() );
         arestaClone->proximo = clonar(aresta->proximo);
         return arestaClone;
     }
@@ -77,7 +77,7 @@ Aresta* Aresta::clonar ( Aresta *aresta ) {
 }
 
 Aresta::~Aresta() {
-    qDebug() << "Excluindo aresta (" << indice <<","<<indiceAdj<<"," << peso << ")";
+    qDebug() << "Excluindo aresta (" << verticeOrigem <<","<<verticeDestino<<"," << peso << ")";
     if (this->proximo!=NULL)
         delete this->proximo;
 }

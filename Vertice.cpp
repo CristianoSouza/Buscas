@@ -9,7 +9,7 @@ Vertice::Vertice ( int indiceVertice, QString nome, QPoint ponto, QObject *pai )
     this->tempoEntrada = 0;
     this->tempoSaida = 0;
     this->ponto = ponto;
-    this->cor  = Qt::white;
+    this->cor  = Qt::blue;
     this->pai = NULL;
     this->arestas  = NULL;
     this->set    = QString::number(indiceVertice);
@@ -59,8 +59,8 @@ void Vertice::setSET ( QString newSet ) {
     this->set = newSet;
 }
 
-void Vertice::acrescentar( int indiceAdj, int peso, QColor cor )  {
-    Aresta::acrescentar( &arestas, indiceVertice, indiceAdj, peso, cor );
+void Vertice::acrescentar( QString verticeDestino, int peso, QColor cor )  {
+    Aresta::acrescentar( &arestas, nome, verticeDestino, peso, cor );
 }
 
 void Vertice::setPai( Vertice *pai ) {

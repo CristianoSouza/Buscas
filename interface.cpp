@@ -63,16 +63,23 @@ QString Interface::getNomeArquivo(){
 }
 
 void Interface::getCaminho(QString metodo){
-    Vertice * vertice = this->grafo->getVertice()[interface->cbFinal->currentIndex()];
+    qDebug() << "getCaminho " << metodo;
+    QHash<QString, Vertice*> verticeAux = this->grafo->getVertice();
+    Vertice * vertice = verticeAux.value(interface->lineEdit->text().toLower());
     QString msg = "";
     int cont = 0;
+    qDebug() << "Percorer Vertices pai";
+    qDebug() << "Vertice Destino: " << interface->lineEdit->text().toLower();
     while (vertice->getPai() != NULL){
+        qDebug() << "Nome: " << vertice->getNome();
         msg = vertice->getNome() + msg;
         msg = " -> " + msg;
+        qDebug() << "Nome pAI: " << vertice->getPai()->getNome();
         vertice = vertice->getPai();
         cont++;
     }
-    msg = this->grafo->getVertice()[interface->cbOrigem->currentIndex()]->getNome() + msg;
+    Vertice * verticeOrigem= verticeAux.value(verticeAux.begin().key());
+    msg = vertice->getNome() + msg;
     qDebug() << msg;
     this->interface->textEdit->setText(metodo + "\n" + msg);
 }
@@ -82,8 +89,9 @@ void Interface::executarAlgoritmo ( int i ) {
     if (algoritmo) delete algoritmo;
         qDebug() << "switch";
     switch (i) {     
-        case BFS : this->algoritmo = new Bfs ( grafo, interface->cbOrigem->currentIndex(), nomeArquivo, this );  break;
-        case DFS : this->algoritmo = new Dfs ( grafo, interface->cbOrigem->currentIndex(), this); break;
+        //case BFS : this->algoritmo = new Bfs ( grafo, interface->cbOrigem->currentText(), nomeArquivo, this );  break;
+        case BFS : this->algoritmo = new Bfs ( grafo, interface->lineEdit->text(), nomeArquivo, this );  break;
+        case DFS : this->algoritmo = new Dfs ( grafo, interface->lineEdit->text(), nomeArquivo, this );  break;
     }
     if (i != ORDENACAO){
         connect( algoritmo,  SIGNAL ( update(Grafo*)), this, SLOT ( mostrarGrafo(Grafo* ) ) );
@@ -127,6 +135,7 @@ void Interface::on_start_clicked() {
 }
 
 void Interface::on_pushButton_clicked() {
+    qDebug() << "Buscando caminhos";
     switch (interface->metodos->currentIndex()) {
         case DFS : getCaminho("DFS");break;
         case BFS : getCaminho("BFS");break;

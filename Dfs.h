@@ -17,7 +17,7 @@ class Dfs : public QThread {
     Q_OBJECT
 
 public:
-    Dfs ( Grafo *grafo, int indice, QObject *parent=0 );
+    Dfs ( Grafo *grafo, QString verticeFinal, QString nomeArquivo, QObject *parent=0 );
 
     Grafo *getGrafo();
 
@@ -32,10 +32,12 @@ signals:
 private:
     Grafo *grafo;
     int tempo;
-    int indice;
-    void metodoDFS ();
+    QString verticeFinal;
+    QString nomeArquivo;
+    bool achou;
+    bool metodoDFS ();
 
-    void visit (Vertice *);
+    bool visit (Vertice *);
 
     //void createNewGraph ( int );
 };

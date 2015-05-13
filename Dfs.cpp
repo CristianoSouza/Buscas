@@ -1,8 +1,10 @@
 #include "Dfs.h"
 
-Dfs::Dfs( Grafo *grafo, int indice, QObject *parent ) : QThread(parent) {
+Dfs::Dfs( Grafo *grafo, QString verticeFinal, QString nomeArquivo, QObject *parent ) : QThread(parent) {
     this->grafo = grafo;
-    this->indice = indice;
+    this->verticeFinal = verticeFinal;
+    this->nomeArquivo = nomeArquivo;
+    this->achou = false;
 }
 
 Dfs::~Dfs () {
@@ -13,38 +15,74 @@ void Dfs::run () {
     metodoDFS();
 }
 
-void Dfs:: metodoDFS() {
-    Vertice **ListaVertice = grafo->getVertice();
-    int quantidade = grafo->getQuantidadeVertice();
-    for(int i = this->indice; i < quantidade; i++) {
-        ListaVertice[i]->setPai(NULL);
-        ListaVertice[i]->setTempoEntrada(INFINITO);
-        ListaVertice[i]->setTempoSaida(INFINITO);
-        ListaVertice[i]->setCor(Qt::white);
-    }
+bool Dfs:: metodoDFS() {
+    qDebug() << "mETODO DFS";
+    grafo->BuscaVerticeRaiz(nomeArquivo);
+    QHash <QString,Vertice*> ListaVertices = grafo->getVertice();
+
     tempo = 0;
-    for(int i = 0; i < quantidade; i++) {
-        if(ListaVertice[i]->getCor() == Qt::white) {
-            visit(ListaVertice[i]);
+
+    ListaVertices.value(ListaVertices.begin().key())->setPeso(0);
+    ListaVertices.value(ListaVertices.begin().key())->setCor(Qt::blue);
+
+    QHashIterator<QString, Vertice*> i(ListaVertices);
+    while (i.hasNext()) {
+        Vertice * vertice = i.next().value();
+        qDebug() << "Vertice" << vertice->getNome();
+        qDebug() << "Vertice FInal " << verticeFinal;
+        if ( vertice->getCor() == Qt::blue ){
+
+            if (visit(vertice)) { qDebug() << "VAI BRECKA"; break;  }
         }
     }
+    return true;
 }
 
-void Dfs::visit(Vertice *vertice) {
+bool Dfs::visit(Vertice *vertice) {
     Aresta *aresta; Vertice *verticeAtual;
+
     vertice->setCor(Qt::gray);
+
     emit update(grafo);
     sleep(1);
+
+    if ( vertice->getNome().toLower() == verticeFinal.toLower()) {
+        vertice->setCor(Qt::green);
+        qDebug() << "SACHOU SAPOHA dentro VISIT";
+        emit update(grafo);
+        sleep(1);
+        return true;
+    }
+
     vertice->setTempoEntrada(tempo++);
+
+    grafo->BuscaArrestasDeDeterminadoVertice( nomeArquivo, vertice );
+
+    emit update(grafo);
+    sleep(1);
+
     for(aresta = vertice->getArestas(); aresta; aresta = aresta->getProximo()) {
-        verticeAtual = grafo->getVertice()[aresta->getIndiceAdj()];
-        if(verticeAtual->getCor() == Qt::white) {
+        verticeAtual= grafo->getVertice(aresta->getverticeDestino());
+        if(verticeAtual->getCor() == Qt::blue) {
             verticeAtual->setPai(vertice);
-            visit(verticeAtual);
+            if ( verticeAtual->getNome().toLower() == verticeFinal.toLower()) {
+                verticeAtual->setCor(Qt::green);
+                qDebug() << " ACHOUUUU UUUUUUUUU U UUUUU SACHOU SAPOHA dentro VISIT VERTICE ATUAL";
+                emit update(grafo);
+                sleep(1);
+                this->achou = true;
+                break;
+            }
+            qDebug() << "NAO SAIUU";
+            if (visit(verticeAtual)) { this->achou = true; break; };
         }
     }
     vertice->setTempoSaida(tempo++);
     vertice->setCor(Qt::black);
     emit update(grafo);
     sleep(1);
+    if( this->achou ) {
+        return true;
+    }
 }
+

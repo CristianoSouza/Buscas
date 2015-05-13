@@ -16,7 +16,7 @@ class Bfs : public QThread {
     Q_OBJECT
 
 public:
-    Bfs ( Grafo *grafo, int verticeOrigem, QString nomeArquivo, QObject *parent=0 );
+    Bfs ( Grafo *grafo, QString verticeFinal, QString nomeArquivo, QObject *parent=0 );
 
     ~Bfs () ;
 
@@ -28,9 +28,10 @@ signals:
 
 private:
     Grafo *grafo;
-    int verticeInicial;
+    QString verticeFinal;
     QString nomeArquivo;
-    void metodoBFS ();
+    bool achou;
+    bool metodoBFS ();
 
 };
 
