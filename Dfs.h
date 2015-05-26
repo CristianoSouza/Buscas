@@ -20,6 +20,7 @@ public:
     Dfs ( Grafo *grafo, QString verticeFinal, QString nomeArquivo, QObject *parent=0 );
 
     Grafo *getGrafo();
+    QString getCaminhoArestas( QString );
 
     ~Dfs () ;
 

@@ -37,7 +37,7 @@ bool Bfs:: metodoBFS() {
         ListaVertices.value(ListaVertices.begin().key())->setCor(Qt::green);
         qDebug() << "SACHOU SAPOHA ";
         emit update(grafo);
-        sleep(1);
+        getCaminhoArestas( verticeFinal );
         return true;
     } else {
 
@@ -60,6 +60,7 @@ bool Bfs:: metodoBFS() {
                 if ( verticeAtual->getCor() == Qt::blue ) {
 
                     verticeAtual->setPai(vertice);
+                    verticeAtual->setArestaPai(aresta);
                     verticeAtual->setPeso(vertice->getPeso() + 1 );
 
                     if ( verticeAtual->getNome().toLower() == verticeFinal.toLower()) {
@@ -79,6 +80,7 @@ bool Bfs:: metodoBFS() {
                     qDebug() << "uPDATE GRAFO";
 
                     verticeAtual->setPai(vertice);
+                    verticeAtual->setArestaPai(aresta);
                     verticeAtual->setPeso(vertice->getPeso() + 1 );
 
                     grafo->BuscaArrestasDeDeterminadoVertice( nomeArquivo, verticeAtual );
@@ -94,12 +96,31 @@ bool Bfs:: metodoBFS() {
             sleep(1);
             qDebug() << "Emitiu sinal";
             if ( this->achou ) {
+                getCaminhoArestas( verticeFinal );
                 qDebug("return true");
                 return true;
             }
 
         }
     }
+
+}
+
+QString Bfs::getCaminhoArestas( QString nome  ) {
+    qDebug() << "GetCaminhoArestas";
+    QHash <QString,Vertice*> ListaVertices = grafo->getVertice();
+    QString s = "";
+
+    Vertice *vertice = ListaVertices.value(nome.toLower());
+    qDebug() << vertice;
+    qDebug() << ListaVertices.count();
+    while (vertice->getPai()!=NULL) {
+        s += vertice->getNome()+ ",";
+        vertice->getPai()->setCor(Qt::green);
+        vertice = vertice->getPai();
+    }
+
+    return s;
 }
 
 

@@ -17,7 +17,7 @@ class Bfs : public QThread {
 
 public:
     Bfs ( Grafo *grafo, QString verticeFinal, QString nomeArquivo, QObject *parent=0 );
-
+    QString getCaminhoArestas( QString );
     ~Bfs () ;
 
 protected:

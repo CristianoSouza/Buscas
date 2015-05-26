@@ -14,6 +14,7 @@ void Aresta::setCor ( QColor valor ) {
 }
 
 void Aresta::pintar(QPoint ponto1, QPoint ponto2, QPainter &pintor ) {
+    //qDebug() << "Aresta: " << ponto1 <<"-"<< ponto2 << " -- Cor : " << cor;
     pintor.setPen( cor );
     pintor.drawLine ( ponto1, ponto2 );
 

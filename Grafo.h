@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QString>
 #include <QColor>
+#include <QThread>
 #include <QMessageBox>
 #include <QMainWindow>
 
@@ -26,19 +27,22 @@ public:
     void adicionarVertice ( QString, QPoint );
     bool adicionarAresta ( QString, QString, int, QColor cor=Qt::black );
 
+
     Aresta    *getArestas();
     QHash<QString,Vertice*>  getVertice ();
+    QHash<QString,Aresta*>  getCaminhoArestas ();
     Vertice  *getVertice ( QString );
     int     getQuantidadeVertice();
-    int     getVerticeIndice ( QString  );
     QString getCaminho ( QString );
+    QString getCaminhoArestas( QString );
     QString carregarDoArquivo( QString );
     QString BuscaVerticeRaiz( QString );
     QString BuscaArrestasDeDeterminadoVertice( QString,  Vertice* );
     QString BuscaVerticesAdj( QString , QString );
     void pintar ();
+    void pintarCaminho ();
 
-    void resize ( int );
+
     void dispose ();
     ~Grafo ( ) ;
 
@@ -49,8 +53,9 @@ private:
     QMainWindow *main;
     //Vertice      **vertice;
     QHash<QString, Vertice*> vertice;
+    QHash<QString, Aresta*> caminhoArestas;
     //std::map<std::string, Vertice> vertice;
-    Aresta        *arestas;
+    Aresta *arestas;
 
     int max;
     int quantidadeVertices;

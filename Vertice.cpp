@@ -11,6 +11,7 @@ Vertice::Vertice ( int indiceVertice, QString nome, QPoint ponto, QObject *pai )
     this->ponto = ponto;
     this->cor  = Qt::blue;
     this->pai = NULL;
+    this->arestaPai = NULL;
     this->arestas  = NULL;
     this->set    = QString::number(indiceVertice);
 }
@@ -37,6 +38,10 @@ Aresta *Vertice::getArestas() {
 
 Vertice *Vertice::getPai() {
     return this->pai;
+}
+
+Aresta *Vertice::getArestaPai() {
+    return this->arestaPai;
 }
 
 int Vertice::getPeso() {
@@ -67,6 +72,14 @@ void Vertice::setPai( Vertice *pai ) {
     this->pai = pai;
 }
 
+void Vertice::setArestaPai( Aresta *arestaPai ) {
+    this->arestaPai = arestaPai;
+}
+
+void Vertice::setAresta( Aresta *aresta ) {
+    this->arestas = aresta;
+}
+
 void Vertice::setPeso ( int peso) {
     this->peso = peso;
 }
@@ -88,13 +101,13 @@ Vertice *Vertice::clonar () {
 }
 
 void Vertice::pintar ( QPainter &pintor ) {
+
     pintor.setBrush ( cor );
     pintor.setPen( (cor==Qt::white)? Qt::black : Qt::white );
     pintor.drawEllipse( ponto.x()-20,  ponto.y()-20, 40, 40 );
 
     QRect rect ( ponto.x()-4,  ponto.y()-8, ponto.x()+4,  ponto.y()+8 );
     pintor.drawText( rect, nome );
-
 
     // colocar peso?
     // setar o pai?

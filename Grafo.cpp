@@ -9,7 +9,7 @@ Grafo::Grafo ( int n, QMainWindow *main, QWidget *pai ) : QWidget (pai)  {
     this->max     = n;
     this->quantidadeVertices   = 0;
 
-    resize(n);
+
 }
 
 void Grafo::pintar () {
@@ -18,36 +18,15 @@ void Grafo::pintar () {
 
     // Pintar primeiramente as arestas
     for (Aresta *aresta=arestas; aresta; aresta= aresta->getProximo() ) {
-        aresta->pintar( getVertice(aresta->getverticeOrigem())->getPonto(),
-                 getVertice(aresta->getverticeDestino())->getPonto(),
-                 pintor );
+        pintor.setPen( Qt::black);
+        aresta->pintar( getVertice(aresta->getverticeOrigem())->getPonto(), getVertice(aresta->getverticeDestino())->getPonto(), pintor );
     }
-    qDebug() << "Pintando Vertices";
     QHashIterator<QString, Vertice*> i(vertice);
     while (i.hasNext()) {
         getVertice(i.next().key())->pintar(pintor);
     }
 }
 
-void Grafo::resize ( int n ) {
-    /*dispose();
-    this->max    = n;
-    this->quantidadeVertices  = 0;
-    for (int i=0; i<max; i++) {
-        vertice[i] = NULL;
-    }*/
-}
-
-int Grafo::getVerticeIndice ( QString nome ) {
-    //for (int i=0; i<quantidadeVertices; i++)
-    /*int i = 0;
-    while (vertice[i] != NULL) {
-        if ((vertice[i]!=NULL) && (vertice[i]->getNome()==nome.toUpper()))
-            return i;
-        i++;
-    }
-    return -1;*/
-}
 
 Vertice* Grafo::getVertice ( QString indiceVertice ) {
     return vertice.value(indiceVertice);
@@ -78,21 +57,38 @@ bool Grafo::adicionarAresta ( QString verticeOrigem, QString verticeDestino, int
 }
 
 QString Grafo::getCaminho( QString nome ) {
-    QString s = "";
+    QString s = "", nomeVertice= "";
+    Aresta *arestaPai, *aresta;
     Vertice *vertice = this->vertice.find(nome).value();
     while (vertice!=NULL) {
         s += vertice->getNome()+ ",";
+        nomeVertice = vertice->getNome();
+        arestaPai = vertice->getArestaPai();
+        for(aresta = vertice->getArestas(); aresta; aresta = aresta->getProximo()) {
+            qDebug() << "Aresta: " << aresta->getverticeOrigem() << " -- "<< aresta->getverticeDestino() <<"";
+            qDebug() << "Aresta Pai: " << arestaPai->getverticeOrigem() << " -- "<< arestaPai->getverticeDestino() <<"";
+            if ( aresta->getverticeDestino() == arestaPai->getverticeDestino()) {
+                aresta->setCor(Qt::red);
+                break;
+            }
+        }
         vertice = vertice->getPai();
+
     }
+
     return s;
 }
 
 Aresta *Grafo::getArestas() {
-    return this->arestas;
+    return arestas;
 }
 
 QHash<QString, Vertice*> Grafo::getVertice ()    {
     return this->vertice;
+}
+
+QHash<QString, Aresta*> Grafo::getCaminhoArestas()    {
+    return this->caminhoArestas;
 }
 
 int Grafo::getQuantidadeVertice()  {
@@ -110,31 +106,50 @@ QString Grafo::carregarDoArquivo( QString nomeArquivo ) {
     }
     QTextStream in(&arquivo);
 
-    QString line;
-    QStringList sl;
-
+    QString linhaLida;
+    QStringList split;
+    QStringList nomeVertice;
+    QStringList cordX;
+    QStringList cordY;
+    QStringList origem;
+    QStringList destino;
+    QStringList peso;
     int n = in.readLine().toInt();
-    resize(n);
     while(!in.atEnd() && n) {
-        line = in.readLine();
+        linhaLida = in.readLine();
         //line = 1,100,100 ==> nome vértice, coordenada x, coordenada y
-        sl = line.split(",");
-        if (sl.count()==3) {
-            adicionarVertice ( sl[0], QPoint(sl[1].toInt(), sl[2].toInt()));
-            v  += c + sl[0];  c   = ";";
+        split = linhaLida.split(",");
+        if (split.count()==3) {
+            nomeVertice= split[0].split("(");
+
+            cordX= split[1].split("=");
+            cordY= split[2].split("=");
+
+            cordY = cordY[1].split(")");
+
+            adicionarVertice ( nomeVertice[1], QPoint(cordX[1].toInt(), cordY[0].toInt()));
+            v  += c + split[0];  c   = ";";
         } else {
             QMessageBox::critical(this,"Carregar vértices", "Erro na estrutura do arquivo - nós [node, coord. x, coord. y]!");
             return "";
         }
         n--;
     }
-    while(!in.atEnd() && !line.isEmpty()) {
-        line = in.readLine();   // line = (1,2,5)
-        line = line.mid(1, line.length() -2 );  // line = 1,2,5
-        sl = line.split(",");
-        if (sl.count()==3)
-            adicionarAresta(sl[0], sl[1], sl[2].toInt() );
-        else {
+    while(!in.atEnd() && !linhaLida.isEmpty()) {
+        linhaLida = in.readLine();   // line = (1,2,5)
+        linhaLida = linhaLida.mid(1, linhaLida.length() -2 );  // line = 1,2,5
+        split = linhaLida.split(",");
+
+        if (split.count()==3){
+            origem = split[0].split("=");
+
+            destino= split[1].split("=");
+            peso= split[2].split("=");
+
+            peso = peso[1].split(")");
+
+            adicionarAresta(origem[1], destino[1], peso[0].toInt() );
+        }else {
             QMessageBox::critical(this,"Carregar arestas", "Erro na estrutura do arquivo - nós [node, coord. x, coord. y]!");
             return "";
         }
@@ -160,29 +175,40 @@ QString Grafo::BuscaArrestasDeDeterminadoVertice( QString nomeArquivo, Vertice *
     }
     QTextStream in(&arquivo);
 
-    QString line;
-    QStringList sl;
+    QString linhaLida;
+    QStringList split;
+    QStringList origem;
+    QStringList destino;
+    QStringList peso;
 
     int n = in.readLine().toInt();
     while(!in.atEnd() && n) {
-        line = in.readLine();
+        linhaLida = in.readLine();
         n--;
     }
 
     qDebug() << "Lendo Arestas!";
-    while(!in.atEnd() && !line.isEmpty()) {
+    while(!in.atEnd() && !linhaLida.isEmpty()) {
         qDebug() << "while leitura de arrestas";
-        line = in.readLine();   // line = (1,2,5)
-        line = line.mid(1, line.length() -2 );  // line = 1,2,5
-        sl = line.split(",");
-        if (sl.count()==3){
+        linhaLida = in.readLine();   // line = (1,2,5)
+        linhaLida = linhaLida.mid(1, linhaLida.length() -2 );  // line = 1,2,5
+        split = linhaLida.split(",");
+        if (split.count()==3){
             qDebug() << "NOME VERTICE:" << vertice->getNome();
-            qDebug() << "SL[0]:" << sl[0].toUpper();
-            if (sl[0].toUpper() == vertice->getNome()) {
-                adicionarAresta(sl[0], sl[1], sl[2].toInt() );
-                qDebug() << "Carregando arresta: " << sl[0] << " - "<< sl[1] << " - "<< sl[2].toInt();
-                qDebug() << "Buscando Vertice: " << sl[1];
-                BuscaVerticesAdj(nomeArquivo,sl[1]);
+            qDebug() << "split[0]:" << split[0].toUpper();
+            origem = split[0].split("=");
+            if (origem[1].toUpper() == vertice->getNome()) {
+
+                destino= split[1].split("=");
+                peso= split[2].split("=");
+
+                peso = peso[1].split(")");
+
+                adicionarAresta(origem[1], destino[1], peso[0].toInt(), Qt::black );
+
+                qDebug() << "Carregando arresta: " << origem[1] << " -> "<< destino[1] << " - "<< peso[0].toInt();
+                qDebug() << "Buscando Vertice: " << destino[1];
+                BuscaVerticesAdj(nomeArquivo, destino[1]);
             }
         } else {
             QMessageBox::critical(this,"Carregar arestas", "Erro na estrutura do arquivo - nós [node, coord. x, coord. y]!");
@@ -198,6 +224,7 @@ QString Grafo::BuscaArrestasDeDeterminadoVertice( QString nomeArquivo, Vertice *
 
 void Grafo::dispose ( ) {
     vertice.clear();
+    arestas = NULL;
 }
 
 QString Grafo::BuscaVerticeRaiz( QString nomeArquivo ) {
@@ -213,16 +240,27 @@ QString Grafo::BuscaVerticeRaiz( QString nomeArquivo ) {
     }
     QTextStream in(&arquivo);
 
-    QString line;
-    QStringList sl;
+    QString linhaLida;
+    QStringList split;
+    QStringList nomeVertice;
+    QStringList cordX;
+    QStringList cordY;
 
     int n = in.readLine().toInt();
-    line = in.readLine();
+    linhaLida = in.readLine();
         //line = 1,100,100 ==> nome vértice, coordenada x, coordenada y
-    sl = line.split(",");
-    if (sl.count()==3) {
-        adicionarVertice ( sl[0], QPoint(sl[1].toInt(), sl[2].toInt()));
-        v  += c + sl[0];  c   = ";";
+    split = linhaLida.split(",");
+    if (split.count()==3) {
+        nomeVertice= split[0].split("(");
+
+        cordX= split[1].split("=");
+        cordY= split[2].split("=");
+
+        cordY = cordY[1].split(")");
+
+        adicionarVertice ( nomeVertice[1], QPoint(cordX[1].toInt(), cordY[0].toInt()));
+
+        v  += c + nomeVertice[1];  c   = ";";
     } else {
         QMessageBox::critical(this,"Carregar vértices", "Erro na estrutura do arquivo - nós [node, coord. x, coord. y]!");
         return "";
@@ -234,7 +272,7 @@ QString Grafo::BuscaVerticeRaiz( QString nomeArquivo ) {
     return v;
 }
 
-QString Grafo::BuscaVerticesAdj( QString nomeArquivo, QString nomeVertice ) {
+QString Grafo::BuscaVerticesAdj( QString nomeArquivo, QString nomeVert ) {
     QString v="", c="";
 
     QFile arquivo( nomeArquivo );
@@ -245,19 +283,30 @@ QString Grafo::BuscaVerticesAdj( QString nomeArquivo, QString nomeVertice ) {
     }
     QTextStream in(&arquivo);
 
-    QString line;
-    QStringList sl;
+    QString linhaLida;
+    QStringList split;
+    QStringList nomeVertice;
+    QStringList cordX;
+    QStringList cordY;
 
     int n = in.readLine().toInt();
 
     while(!in.atEnd() && n) {
-        line = in.readLine();
+        linhaLida = in.readLine();
         //line = 1,100,100 ==> nome vértice, coordenada x, coordenada y
-        sl = line.split(",");
-        if (sl.count()==3) {
-            if (sl[0] == nomeVertice) {
-                adicionarVertice ( sl[0], QPoint(sl[1].toInt(), sl[2].toInt()));
-                v  += c + sl[0];  c   = ";";
+        split = linhaLida.split(",");
+        if (split.count()==3) {
+            nomeVertice= split[0].split("(");
+            if (nomeVertice[1] == nomeVert) {
+                nomeVertice= split[0].split("(");
+
+                cordX= split[1].split("=");
+                cordY= split[2].split("=");
+
+                cordY = cordY[1].split(")");
+
+                adicionarVertice ( nomeVertice[1], QPoint(cordX[1].toInt(), cordY[0].toInt()));
+                v  += c + nomeVertice[1];  c   = ";";
             }
         } else {
             QMessageBox::critical(this,"Carregar vértices", "Erro na estrutura do arquivo - nós [node, coord. x, coord. y]!");

@@ -23,6 +23,7 @@ bool Dfs:: metodoDFS() {
     tempo = 0;
 
     ListaVertices.value(ListaVertices.begin().key())->setPeso(0);
+    ListaVertices.value(ListaVertices.begin().key())->setPai(NULL);
     ListaVertices.value(ListaVertices.begin().key())->setCor(Qt::blue);
 
     QHashIterator<QString, Vertice*> i(ListaVertices);
@@ -35,6 +36,8 @@ bool Dfs:: metodoDFS() {
             if (visit(vertice)) { qDebug() << "VAI BRECKA"; break;  }
         }
     }
+    getCaminhoArestas(verticeFinal);
+
     return true;
 }
 
@@ -84,5 +87,23 @@ bool Dfs::visit(Vertice *vertice) {
     if( this->achou ) {
         return true;
     }
+}
+
+
+QString Dfs::getCaminhoArestas( QString nome  ) {
+    qDebug() << "GetCaminhoArestas";
+    QHash <QString,Vertice*> ListaVertices = grafo->getVertice();
+    QString s = "";
+
+    Vertice *vertice = ListaVertices.value(nome.toLower());
+    qDebug() << vertice;
+    qDebug() << ListaVertices.count();
+    while (vertice->getPai()!=NULL) {
+        s += vertice->getNome()+ ",";
+        vertice->getPai()->setCor(Qt::green);
+        vertice = vertice->getPai();
+    }
+    qDebug() << "Saiu get caminho arestas";
+    return s;
 }
 

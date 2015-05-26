@@ -86,12 +86,25 @@ void Interface::getCaminho(QString metodo){
 
 void Interface::executarAlgoritmo ( int i ) {
     qDebug() << "EXECUNTANDO ALGORITMO";
-    if (algoritmo) delete algoritmo;
+    algoritmo= NULL;
         qDebug() << "switch";
     switch (i) {     
-        //case BFS : this->algoritmo = new Bfs ( grafo, interface->cbOrigem->currentText(), nomeArquivo, this );  break;
-        case BFS : this->algoritmo = new Bfs ( grafo, interface->lineEdit->text(), nomeArquivo, this );  break;
-        case DFS : this->algoritmo = new Dfs ( grafo, interface->lineEdit->text(), nomeArquivo, this );  break;
+        case BFS : {
+            delete grafo;
+            this->grafo=new Grafo(0, this);
+            emit mostrar ( grafo );
+            this->algoritmo = new Bfs ( grafo, interface->lineEdit->text(), nomeArquivo, this );
+            break;
+        }
+        case DFS : {
+            qDebug() << "Metodo Dfs";
+            grafo= NULL;
+            qDebug() << "Deletou Grafo";
+            this->grafo=new Grafo(0, this);
+            emit mostrar ( grafo );
+            this->algoritmo = new Dfs ( grafo, interface->lineEdit->text(), nomeArquivo, this );
+            break;
+        }
     }
     if (i != ORDENACAO){
         connect( algoritmo,  SIGNAL ( update(Grafo*)), this, SLOT ( mostrarGrafo(Grafo* ) ) );
@@ -113,19 +126,15 @@ void Interface::mostrarGrafo ( Grafo *grafo ) {
 void Interface::on_actionLoad_triggered() {
     QDir::setCurrent("../files");
     qDebug() << QDir::currentPath();
+    nomeArquivo = "";
     nomeArquivo =  QFileDialog::getOpenFileName( this, tr("Open Document"), QDir::currentPath(), tr("Document files (*.txt);All files (*.*)"), 0, QFileDialog::DontUseNativeDialog );
 }
 
 void Interface::on_actionMostrarArvore_triggered() {
     if( !nomeArquivo.isNull() ) {
-        //qDebug() << filename.toAscii();
-        //QString s = grafo->carregarDoArquivo(nomeArquivo);
-        //interface->cbOrigem->addItems( s.split(";"));
-        //interface->cbFinal->addItems( s.split( ";") );
-        grafo->BuscaVerticeRaiz(nomeArquivo);
+        grafo->carregarDoArquivo(nomeArquivo);
         emit mostrar ( grafo );
     }
-    emit mostrar ( grafo );
 }
 
 void Interface::on_start_clicked() {
@@ -137,8 +146,15 @@ void Interface::on_start_clicked() {
 void Interface::on_pushButton_clicked() {
     qDebug() << "Buscando caminhos";
     switch (interface->metodos->currentIndex()) {
-        case DFS : getCaminho("DFS");break;
-        case BFS : getCaminho("BFS");break;
+        case DFS :
+            getCaminho("DFS");
+            this->tmp = grafo;
+                update ();
+        case BFS :
+            getCaminho("BFS");
+            this->tmp = grafo;
+                update ();
+                break;
     }
 }
 
